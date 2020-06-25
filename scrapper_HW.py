@@ -1,42 +1,33 @@
 import requests
 from bs4 import BeautifulSoup
 
-# data = requests.get("https://store.steampowered.com/search/?specials=1")
-# url = "https://store.steampowered.com/search/?specials=1"
-# result = BeautifulSoup(data.text, 'html.parser')
-# LIMIT = 50
-
-# print(data.status_code)
-# print(result)
+url = "https://www.indeed.com/jobs?q=python&limit=50&vjk=91ac3fcf406a26e9"
+LIMIT = 50
 
 
-# def section_extract():
-#     data1 = requests.get(url)
-#     steam_result = BeautifulSoup(data1.text, 'html.parser')
-#     game_links = steam_result.find_all('a', {'class': 'serch_result_row'})
-#     pages = []
-#     for link in game_links:
-#         pages.append(link.string)
-#     return pages
+def extract_pages():
+	data = requests.get(url)
+	indeed_result = BeautifulSoup(data.text, "html.parser")
+	pagination = indeed_result.find("div", {'class' : 'pagination'})
+	links = pagination.find_all("a")
+	pages = []
+	for link in links[:-1]:
+		pages.append(int(link.string))
+	max_page = pages[-1]
+	return max_page
 
 
-def pagination_extract():
-    url = requests.get("https://www.indeed.com/jobs?q=python&limit=50&start=400")
-    result = BeautifulSoup(url.text, 'html.parser')
-    pagination = result.find('div', {'class': 'pagination'})
-    links = pagination.find_all('a')
-    pages = []
-    for link in links[:-1]:
-        pages.append(int(link.string))
-    page = pages[-1]
-    return page
-    # print(result)
-    print(page)
-    # for game_title in pages:
-    #     title = game_title.find('div', {'class': 'responsive_search_name_combined'})
-    #     title2 = title.find('div', {'class': 'col'})
-    #     title3 = title2.find('span', {'class': 'title'})
-    #     print(title3)
+def title_extract(last_page):
+	jobs = []
+	result = requests.get(f"{url}&start={0*LIMIT}")
+	soup = BeautifulSoup(result.text, "html.parser")
+	job_titles = soup.find_all("div", {'class' : 'jobsearch-SerpJobCard'})
 
+	for job_title in job_titles:
+		title = job_title.find('h2', {'class' : 'title'})
+		anchor = (title.find('a')["title"])
+		print(anchor)
+	return jobs
 
-pagination_extract()    
+last_page = extract_pages()
+title_extract(last_page)
